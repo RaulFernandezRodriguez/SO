@@ -10,7 +10,8 @@
 void tecnico(int i);
 void encargado(int i);
 void asistente(int i);
-int main(int argc, char*argv[]){ //tecnico padre
+
+int main(int argc, char*argv[]){ //coordinador es  padre
     srand (time(NULL));
     pid_t tecnico, encargado, a;
     tecnico = fork();
@@ -41,6 +42,7 @@ int main(int argc, char*argv[]){ //tecnico padre
             kill(asistente[i], SIGTERM);
         }
     }
+
     int pasajeros = 0;
     int overbooking = signal(SIGUSR1, encargado);
     for(int i = 0; i < asistentes.length(); i++){
@@ -50,9 +52,7 @@ int main(int argc, char*argv[]){ //tecnico padre
         pasajeros = pasajeros -10;
     }
     printf(pasajeros);
-    //wait(SIGUSR1);
-
-    pause();
+}
 
     void tecnico(int i){
         printf("Tecnico contactado");
@@ -67,8 +67,7 @@ int main(int argc, char*argv[]){ //tecnico padre
     }
 
     void asistente(int i){
-        printf("Asistente" + p + "contactado")
+        printf("Asistente" + getpid() + "contactado");
         sleep(rand() %4 + 3);
-        exit(rand() %11 + 20)
+        exit(rand() %11 + 20);
     }
-}
