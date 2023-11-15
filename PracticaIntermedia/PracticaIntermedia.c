@@ -35,6 +35,7 @@ int main(int argc, char*argv[]){ //coordinador es  padre
 
     sleep(2);
     int vuelo = signal(SIGUSR1, tecnico);
+    pause();
     if(vuelo == 0){
         kill(tecnico, SIGTERM);
         kill(encargado, SIGTERM)
@@ -45,6 +46,7 @@ int main(int argc, char*argv[]){ //coordinador es  padre
 
     int pasajeros = 0;
     int overbooking = signal(SIGUSR1, encargado);
+    pause();
     for(int i = 0; i < asistentes.length(); i++){
         pasajeros =  pasajeros + signal(SIGUSR2, asistentes[i]);
     }
