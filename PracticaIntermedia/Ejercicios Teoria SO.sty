@@ -1,0 +1,58 @@
+Ejercicios Teoria SO
+1)
+int main(int argc, char *argv[]){
+    int i;
+    for(i = 1; i <= argc; i++){
+        fork();
+    }
+    / * ... * /
+    return 0;
+}
+argc = 3 
+Haz la jerarquia, un diagrama con los procesos que se van creando, cual es el numero de progresos si argc = n
+Se crearan 8 procesos hijo (incluido padre) y si es n seria 2^n
+
+(padre) -> crea 3 hijos despues de las 3 iteraciones -> cada hijo crea i -1 hijos
+            
+. (3) (1)   -> . (2) (2)    -> .  (1) (3)   -> . (0) (4)
+                            -> .  (0) (4)
+            -> . (1) (3)    -> .  (0) (4)
+            -> . (0) (4)
+
+(x) -> x son las iteraciones que le fatarian por ejecutar o hijos a crear, por ejemplo el padre tiene 3 iteraciones,
+cre 3 hijos, etc...
+(i = y)  
+
+
+2) las variables locales , que toman valor unicamente en su propio hilo
+
+3) No siempre, por que si existe solo un proceso o *si la politica de planificacion sigue igual* o la prioridad
+
+6)  A) Verdadero
+    B) Verdadero
+    c) Falso, un unico proceso hace la llamada a pipe, despues hago un  fork y los 2 procesos comparten la pipe
+    ejemplo:    
+        int tubo[2];
+        pipe(tubo);
+        if(fork()){
+            read(tubo[0], buf, 11);
+        }else{
+            write(tubo[1], "Hola mundo", 11);
+        }
+
+7)  Cierto: c
+
+8)  NoRequisito: alternancia estricta
+
+9) Primer read, no se bloquea ya que hay datos, consume 36 datos, quedandod¡ 42 bytes en la pipe, pero en la segunda read, 
+no se bloquea pero solo le 42bytes.
+
+10) 
+P1                              P2
+accion 1                        pause()     
+kill(pid, SIGUSR1);             accion2
+
+11)
+P1                              P2
+accion1                         wait(1)
+signal(1)                       accion2
