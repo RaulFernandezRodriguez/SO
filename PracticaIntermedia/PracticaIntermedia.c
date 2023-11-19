@@ -13,67 +13,94 @@ int randomizer(int max, int min);
 
 int main(int argc, char*argv[]){ //coordinador es  padre
     struct sigaction ss;
-    srand (time(NULL)); // getpid
-    pid_t tecnico, encargado, asistentes, asis;
-    tecnico = fork();
-    if(tecnico == 0){
-        ss.sa_handler = &tecnicoHandler;
-        pause();
+    srand(time(NULL));
+    pid_t tecnico, encargado, *asistentes, actual;
+    actual = fork();
+    if(actual == -1){
+        printf("Error al contratar a un tecnico, estan en huelga, cancelando...\n");
+       return 1;
     }
-    encargado = fork(); 
-    if(encargado == 0){
-        ss.sa_handler = &encargadoHandler;  
-        pause();
-    }
+    tecnico = actual;
+    if(actual != 0){
+        actual = fork();
+        if(actual == -1){
+            perror("Error al contratar a un encargado, LinkedIn estaba caido, cancelando...\n");
+            return 1;
+        }
+        encargado = actual;
+    }            
+ 
     asistentes = (pid_t *)malloc(sizeof(pid_t) * argc);
     for (int i=0; i < argc; i++) {
-        asis = fork();
-        if (asis == -1) {
-            perror("Error en la llamada a fork()");
-        } else if (asis == 0) {
-            *(asistentes + i) = asis;
+        actual = fork();
+        if (actual == -1) {
+            perror("Error al llamar a los asistentes, asi no se puede seguir...\n");
+            return 1;
+        } else if (actual = 0) {   
+            ss.sa_handler = &asistenteHandler;
+            if(sigaction(SIGUSR2, &ss, NULL) == -1){
+                perror("Error al configurar a los asistentes, cancelando...\n");
+                return 1;
+            }
+            printf("Asistente contractado");
             pause();
+        }else{
+            *(asistentes + i) = actual;
         }
     }
-    sleep(2);
-    int vuelo = sigaction(SIGUSR1, &ss, NULL);
-    pause();
-    if(WIFSIGNALED(&status)){
-
-    }else{
-        if(WEXITSTATUS(&status) == 0){
-            printf("El tecnico no ha considerado viable el vuelo, cancelando.\n");
-                if(vuelo == 0){
+    if(tecnico == 0){
+        ss.sa_handler = &tecnicoHandler;
+        if(sigaction(SIGUSR1, &ss, NULL) == -1){
+            perror("Error al contactar al tecnico, estara tomando la siesta, cancelando...\n");
+            return 1;
+        }
+        pause();
+    }else if(encargado == 0){
+        ss.sa_handler = &encargadoHandler;
+        if(sigaction(SIGUSR1, &ss, NULL) == -1){
+            perror("Error al contactar al encargado, para esto le pagamos, cancelando...\n");           
+        }
+        pause();
+    }else{ //coordinator
+        sleep(2);
+        kill(tecnico, SIGUSR1);
+        int status;
+        wait(&status);
+        if(!WIFEXITED(status)){
+            printf("Algo ha ocurrido con el tecnico, tendremos que cancelar...\n");
+            return 1;
+        }else{
+            if(WEXITSTATUS(status) == 1){
+                printf("El tecnico no ha considerado viable el vuelo, cancelando.\n");
                 kill(tecnico, SIGTERM);
                 kill(encargado, SIGTERM);
                 for(int i = 0; i < sizeof(asistentes); i++){
                     kill(*(asistentes +i), SIGTERM);
                 }
-            }
-        }else{
-            printf("Nuestro tecnico ha considerado viable el vuelo, continuando");
-            if(encargado){ //encargado
-                int overbooking = sigaction(SIGUSR1, &ss, NULL);
-                pause(); 
-                if(coordinador){
-                        int pasajeros = 0;
-                    for(int i = 0; i < sizeof(asistentes); i++){
-                        kill(*(asistentes), SIGUSR2);
-                    }
-                    while(pid != -1){
-                        pid = wait(&status);
-                        if(WIFSIGNALED(wstatus)){
-                            
-                        }
-                        pasajeros = pasajeros + WEXITSTATUS(status);
-                        
-                    }
-                    if(overbooking == 1){
-                        printf("Buf,se nos ha ido de manos el planteamiento y hemos tenido overbooking");
-                        pasajeros = pasajeros -10;
-                    }
-                    printf("Los %d pasajeros estan preparados para el vuelo, disfruten del viaje.\n", pasajeros);
+                return 1;
+            }else{
+                printf("Nuestro tecnico ha considerado viable el vuelo, continuando\n");
+                kill(encargado, SIGUSR1);
+                int overbooking;
+                wait(&status);
+                if(!WIFEXITED(status)){
+                    printf("Algo ha ocurrido con el encargado, tendremos que cancelar.....\n");
+                    return 1;
                 }
+                overbooking = WEXITSTATUS(status);
+                int pasajeros = 0;
+                for(int i = 0; i < argc; i++){
+                    kill(*(asistentes +i), SIGUSR2);
+                }
+                for(int i = 0; i < argc; i++){
+                    wait(&status);
+                    pasajeros = pasajeros + WEXITSTATUS(status);  
+                }
+                if(overbooking == 1){
+                    printf("Buf,se nos ha ido de manos el planteamiento y hemos tenido overbooking.\n");
+                    pasajeros = pasajeros -10;
+                }
+                printf("Los %d pasajeros estan preparados para el vuelo, disfruten del viaje.\n", pasajeros);     
             }
         }
     }
@@ -83,8 +110,8 @@ int main(int argc, char*argv[]){ //coordinador es  padre
 
     void tecnicoHandler(int i){
         printf("Tecnico contactado.\n");
-        sleep(randdomizer(6,3));
-        exit(randomizer(1,0));
+        sleep(randomizer(6,3));
+        exit(randomizer(2,1));
     }
 
     void encargadoHandler(int i){

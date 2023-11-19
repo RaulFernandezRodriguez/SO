@@ -9,13 +9,13 @@ function menu(){
 }
 
 function get_passengers(){
-    incorrecto = "^[0-9]+$"
+    incorrecto="^[0-9]+$"
     while true; do
         echo "Para cuantos es el vuelo?"
         read assistants
-        if [$assistants = $incorrecto]; then
+        if ! [[ $assistants =~ $incorrecto ]]; then
             echo "Pero si eso no es un numero, vuelve a intentarlo"
-        elif test assistants -lt 0; then
+        elif test $assistants -lt 0; then
             echo "Pero como vas a meter pasajeros negativos, vuelve a intentarlo"
         else 
             echo "Todo correcto, preparando el vuelo..."
