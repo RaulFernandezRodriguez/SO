@@ -38,6 +38,7 @@ function get_passengers(){
         3)  
             if test -f vuelo.intento -a -x vuelo.intento; then 
                 get_passengers
+                echo "Preparamos el vuelo con $assistants asistentes" 
                 ./vuelo.intento $assistants           
             else
                 echo "Fallo al intentar ejecutar el vuelo, comprueba y vuelve a intentar"

@@ -12,6 +12,8 @@ void asistenteHandler(int i);
 int randomizer(int max, int min);
 
 int main(int argc, char*argv[]){ //coordinador es  padre
+    int num_Asistentes = atoi(argv[1]);
+    printf("Tenemos %d asistentes.\n", num_Asistentes);
     struct sigaction ss;
     srand(time(NULL));
     pid_t tecnico, encargado, *asistentes, actual;
@@ -29,25 +31,6 @@ int main(int argc, char*argv[]){ //coordinador es  padre
         }
         encargado = actual;
     }            
- 
-    asistentes = (pid_t *)malloc(sizeof(pid_t) * argc);
-    for (int i=0; i < argc; i++) {
-        actual = fork();
-        if (actual == -1) {
-            perror("Error al llamar a los asistentes, asi no se puede seguir...\n");
-            return 1;
-        } else if (actual = 0) {   
-            ss.sa_handler = &asistenteHandler;
-            if(sigaction(SIGUSR2, &ss, NULL) == -1){
-                perror("Error al configurar a los asistentes, cancelando...\n");
-                return 1;
-            }
-            printf("Asistente contractado");
-            pause();
-        }else{
-            *(asistentes + i) = actual;
-        }
-    }
     if(tecnico == 0){
         ss.sa_handler = &tecnicoHandler;
         if(sigaction(SIGUSR1, &ss, NULL) == -1){
@@ -62,6 +45,24 @@ int main(int argc, char*argv[]){ //coordinador es  padre
         }
         pause();
     }else{ //coordinator
+        asistentes = (pid_t *)malloc(sizeof(pid_t) * num_Asistentes);
+        for (int i=0; i < num_Asistentes; i++) {
+            actual = fork();
+            if (actual == -1) {
+                perror("Error al llamar a los asistentes, asi no se puede seguir...\n");
+                return 1;
+            } else if (actual == 0) {   
+                ss.sa_handler = &asistenteHandler;
+                if(sigaction(SIGUSR2, &ss, NULL) == -1){
+                    perror("Error al configurar a los asistentes, cancelando...\n");
+                    return 1;
+                }
+                printf("Asistente contratado via entevista de trabajo.\n");
+                pause();
+            }else{
+                *(asistentes + i) = actual;
+            }
+        }
         sleep(2);
         kill(tecnico, SIGUSR1);
         int status;
@@ -71,7 +72,7 @@ int main(int argc, char*argv[]){ //coordinador es  padre
             return 1;
         }else{
             if(WEXITSTATUS(status) == 1){
-                printf("El tecnico no ha considerado viable el vuelo, cancelando.\n");
+                printf("El tecnico NO ha considerado viable el vuelo, cancelando.\n");
                 kill(tecnico, SIGTERM);
                 kill(encargado, SIGTERM);
                 for(int i = 0; i < sizeof(asistentes); i++){
@@ -89,10 +90,11 @@ int main(int argc, char*argv[]){ //coordinador es  padre
                 }
                 overbooking = WEXITSTATUS(status);
                 int pasajeros = 0;
-                for(int i = 0; i < argc; i++){
+                printf("Vamos a ir registrando los pasajeros.\n");
+                for(int i = 0; i < num_Asistentes; i++){
                     kill(*(asistentes +i), SIGUSR2);
                 }
-                for(int i = 0; i < argc; i++){
+                for(int i = 0; i < num_Asistentes; i++){
                     wait(&status);
                     pasajeros = pasajeros + WEXITSTATUS(status);  
                 }
@@ -117,7 +119,7 @@ int main(int argc, char*argv[]){ //coordinador es  padre
     void encargadoHandler(int i){
         printf("Encargado contactado.\n");
         sleep(2);
-        exit(randomizer(1, 0));
+        exit(randomizer(2, 1));
     }
 
     void asistenteHandler(int i){
