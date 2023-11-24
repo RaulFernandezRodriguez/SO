@@ -56,3 +56,61 @@ kill(pid, SIGUSR1);             accion2
 P1                              P2
 accion1                         wait(1)
 signal(1)                       accion2
+
+12)int tubo[2] pipe(tubo) fork
+P1                                  P2
+Accion1();                          read(tubo[0], &C, sizeof(char))
+write(tubo[1], '1', sizeof(char))   Accion2();
+
+13) c_signal c_wait (contunuar = false)
+P1                              P2
+Accion1();                      lock(m)
+lock(m)                         while(continuar != TRUE) -> c_wait(m,c)
+continuar=TRUE
+c_signal(c)                     Accion2
+unlock(m)
+
+14) semaforo = puente, semNumIzq, semIzq / variables = numIzq
+EntrarIzquierda(){
+    wait(semNumIzq);
+    numIzq++;
+    if(numIzq==1){
+        signal(semNumIzq)
+        wait(puente)
+    }else{
+        signal(semNumIzq)
+        wait(semIzq)
+    }
+}
+
+SalirIzquieda{
+    wait(semNumIzq)
+    numIzq--
+    if(numIzq==0){
+        signal(semNumIzq)
+        signal(puente)
+    }else{
+        signal(semNumIzq)
+        signal(semIzq)
+    }
+}
+
+Identico seria para la derecha
+
+15)
+C,I                    
+P1, P2
+P1:reserva(c)
+P2:reserva(I)
+P1:reserva(I)
+P2:reserva(c)
+I=[1 1] D=[0 0] 
+A = 1  0    =   S = 0   1
+    0  1            0   0
+S[0] <= D
+[0 1] <= [0 0] incorrecto, pero
+S[1] <= D
+[0 0] <= [0 0] este si
+D = D + A[1]
+
+ 

@@ -11,10 +11,7 @@ void actualtime(int hours);
 
 int main(void){
     signal(SIGALRM, actualtime);
-
     system("date");
-    
-
     while(1){
         alarm(10);
         pause();
