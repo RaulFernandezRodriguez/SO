@@ -1,6 +1,8 @@
 #!/bin/bash
 
 function menu(){
+    echo ""
+    echo "------------------------------------------------------------------"
     echo "Que quieres hacer:"
     echo "1) Quiero ver el codigo"
     echo "2) Quiero compilar el vuelo"
@@ -9,15 +11,12 @@ function menu(){
 }
 
 function get_passengers(){
-    incorrecto="^[0-9]+$"
     while true; do
-        echo "Para cuantos es el vuelo?"
+        echo "¿Para cuantos es el vuelo?"
         read assistants
-        if ! [[ $assistants =~ $incorrecto ]]; then
-            echo "Pero si eso no es un numero, vuelve a intentarlo"
-        elif test $assistants -lt 0; then
-            echo "Pero como vas a meter pasajeros negativos, vuelve a intentarlo"
-        else 
+        if [[ $assistants -le 0 || ! $assistants =~ ^[0-9]+$ ]]; then 
+            echo "Entrada incorrecta, centrate y mete un numero positivo, que no es tan dificil, vuelve a intentarlo"
+        elif  [[ $assistants =~ ^[0-9]+$ ]]; then 
             echo "Todo correcto, preparando el vuelo..."
             break
         fi
@@ -32,14 +31,14 @@ function get_passengers(){
             cat PracticaIntermedia.c
             ;;
         2)
-            gcc PracticaIntermedia.c -o vuelo.intento
+            gcc PracticaIntermedia.c -o vuelo.plan
             echo "Vuelo compilado"
             ;;
         3)  
-            if test -f vuelo.intento -a -x vuelo.intento; then 
+            if test -f vuelo.plan -a -x vuelo.plan; then 
                 get_passengers
                 echo "Preparamos el vuelo con $assistants asistentes" 
-                ./vuelo.intento $assistants           
+                ./vuelo.plan $assistants           
             else
                 echo "Fallo al intentar ejecutar el vuelo, comprueba y vuelve a intentar"
             fi

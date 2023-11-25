@@ -12,9 +12,12 @@ void asistenteHandler(int i);
 int randomizer(int max, int min);
 
 int main(int argc, char*argv[]){ //coordinador es  padre
+    printf("------------------------------------------------------------------\n");
+    printf("Buenas, gracias por confiar en vuelos ULE, empezamos con los preparativos.\n");
     int num_Asistentes = atoi(argv[1]);
-    printf("Tenemos %d asistentes.\n", num_Asistentes);
+    printf("Tenemos que contratar %d asistentes.\n", num_Asistentes);
     struct sigaction ss;
+    int status;
     srand(time(NULL));
     pid_t tecnico, encargado, *asistentes, actual;
     actual = fork();
@@ -65,10 +68,14 @@ int main(int argc, char*argv[]){ //coordinador es  padre
         }
         sleep(2);
         kill(tecnico, SIGUSR1);
-        int status;
         wait(&status);
         if(!WIFEXITED(status)){
             printf("Algo ha ocurrido con el tecnico, tendremos que cancelar...\n");
+            kill(tecnico, SIGTERM);
+            kill(encargado, SIGTERM);
+            for(int i = 0; i < sizeof(asistentes); i++){
+                kill(*(asistentes +i), SIGTERM);
+            }
             return 1;
         }else{
             if(WEXITSTATUS(status) == 1){
@@ -80,12 +87,17 @@ int main(int argc, char*argv[]){ //coordinador es  padre
                 }
                 return 1;
             }else{
-                printf("Nuestro tecnico ha considerado viable el vuelo, continuando\n");
+                printf("Nuestro tecnico ha considerado viable el vuelo, continuando.\n");
                 kill(encargado, SIGUSR1);
                 int overbooking;
                 wait(&status);
                 if(!WIFEXITED(status)){
-                    printf("Algo ha ocurrido con el encargado, tendremos que cancelar.....\n");
+                    printf("Algo ha ocurrido con el encargado, tendremos que cancelar...\n");
+                    kill(tecnico, SIGTERM);
+                    kill(encargado, SIGTERM);
+                    for(int i = 0; i < sizeof(asistentes); i++){
+                        kill(*(asistentes +i), SIGTERM);
+                    }
                     return 1;
                 }
                 overbooking = WEXITSTATUS(status);
@@ -110,27 +122,27 @@ int main(int argc, char*argv[]){ //coordinador es  padre
     return 0;
 }
 
-    void tecnicoHandler(int i){
-        printf("Tecnico contactado.\n");
-        sleep(randomizer(6,3));
-        exit(randomizer(2,1));
-    }
+void tecnicoHandler(int i){
+    printf("Tecnico contactado.\n");
+    sleep(randomizer(6,3));
+    exit(randomizer(2,1));
+}
 
-    void encargadoHandler(int i){
-        printf("Encargado contactado.\n");
-        sleep(2);
-        exit(randomizer(2, 1));
-    }
+void encargadoHandler(int i){
+    printf("Encargado contactado.\n");
+    sleep(2);
+    exit(randomizer(2, 1));
+}
 
-    void asistenteHandler(int i){
-        printf("Asistente %d contactado.\n", getpid());
-        sleep(randomizer(6, 3));
-        int pasajeros = randomizer(30, 20);
-        printf("El asistente %d hay conseguido embarcar a unos %d pasajeros.\n", getpid(), pasajeros);
-        exit(pasajeros);
-    }
+void asistenteHandler(int i){
+    printf("Asistente %d contactado.\n", getpid());
+    sleep(randomizer(6, 3));
+    int pasajeros = randomizer(30, 20);
+    printf("El asistente %d hay conseguido embarcar a unos %d pasajeros.\n", getpid(), pasajeros);
+    exit(pasajeros);
+}
 
-    int randomizer(int max, int min){
-        srand(getpid());
-        return rand() % (max - min +1) + min;
-    }
+int randomizer(int max, int min){
+    srand(getpid());
+    return rand() % (max - min +1) + min;
+}
