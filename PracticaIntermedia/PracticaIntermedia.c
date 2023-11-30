@@ -12,13 +12,15 @@ void asistenteHandler(int i);
 int randomizer(int max, int min);
 
 int main(int argc, char*argv[]){ //coordinador es  padre
-    if(argc != 2)
-        perror("Numero de entradas invalida, cancelando.|n");
+    if(argc != 2){
+        perror("Numero de entradas invalida, cancelando.\n");
+        return 1;
+    }
     printf("------------------------------------------------------------------\n");
     printf("Buenas, gracias por confiar en vuelos ULE, empezamos con los preparativos.\n");
     int num_Asistentes = atoi(argv[1]);
     if(num_Asistentes < 1){
-        perror("Numero erroneo de asistentes, cancelando vuelo...");
+        perror("Numero erroneo de asistentes, cancelando vuelo...\n");
         return 1;
     }
     printf("Tenemos que contratar %d asistentes.\n", num_Asistentes);
