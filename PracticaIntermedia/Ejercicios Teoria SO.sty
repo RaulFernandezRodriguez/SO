@@ -113,4 +113,48 @@ S[1] <= D
 [0 0] <= [0 0] este si
 D = D + A[1]
 
- 
+
+21)
+En la de existencias E , hay un 3 cuando deberia de ser 2
+
+22)
+Tenemos una solicitud no satisfecha de 2 unidsdes en el recurso 3, no hay ninguna asigacion en el recurso 3 por tanto no podemos confirmar
+
+17)
+int result fork();
+int fd open(char *path, mode_t mode);
+int nbytes read(int fd, char *buff, int count);
+int nbytes write(int fd, ...);
+int res close;
+(kill y sleep)
+
+int r productor(int fd){
+    int f = open ("data.txt", RDONLY);
+    char buff [1024];
+    int r = read(f, buff, 1024);
+    write(fd, buff, 1024);
+    close(f);
+}
+
+int r consumidor(int fd){
+    char buff [1024];
+    int n = read(fd, buff, 1024);
+    printf("%d\n", n);
+}
+
+main(){
+    int p = fork();
+    if(p==0)
+        close(f[1])
+        consumidor(fd[0])
+        close(f[0])
+    else    
+        p2 = fork()
+        if(p2==0)
+            productor(f[1])
+            exit(0)
+        else    
+            sleep(60)
+            kill()
+            kill()
+}

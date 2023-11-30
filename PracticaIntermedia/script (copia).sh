@@ -32,7 +32,6 @@ function get_passengers(){
             ;;
         2)
             gcc PracticaIntermedia.c -o vuelo.plan
-            chmod +x vuelo.plan
             echo "Vuelo compilado"
             ;;
         3)  
